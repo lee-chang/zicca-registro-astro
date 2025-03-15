@@ -1,0 +1,31 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <body class="bg-gray-50 relative">
+    <div class="flex flex-col items-center justify-center min-h-screen p-6">
+      <div class="bg-white/85 relative p-10 rounded-xl shadow-md w-full max-w-md">
+        <a href="javascript:history.back()" class="absolute top-2 left-2 text-blue-600 hover:text-blue-800">
+          <span class="mr-2">&#x2190;</span> Atras
+        </a>
+        <h1 class="text-3xl font-bold mb-6 text-center">Verifica tu Cuenta</h1>
+        <form action="/validate" method="post" class="flex flex-col gap-4">
+          <input
+            type="email"
+            name="email"
+            placeholder="Ingresa tu correo"
+            required
+            class="p-3 border border-gray-300 rounded"
+          />
+          <button
+            type="submit"
+            class="p-3 font-semibold text-white bg-gradient-to-r from-blue-700 to-purple-600 rounded-lg hover:-translate-y-1 hover:shadow-lg transition duration-200"
+          >
+            Verificar y Actualizar Datos
+          </button>
+        </form>
+      </div>
+    </div>
+  </body>
+</Layout>

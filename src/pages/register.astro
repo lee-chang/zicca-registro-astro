@@ -1,0 +1,17 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+---
+<Layout>
+	<body>
+		<div id="container">
+			<h1>Registro de Cliente</h1>
+			<form action="/register" method="post">
+				<input type="text" name="name" placeholder="Nombre completo" required />
+				<input type="email" name="email" placeholder="Correo electrónico" required />
+				<input type="tel" name="phone" placeholder="Teléfono" />
+				<button type="submit">Registrar</button>
+			</form>
+		</div>
+	</body>
+</Layout>

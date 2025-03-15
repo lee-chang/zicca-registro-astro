@@ -1,0 +1,14 @@
+---
+import LinkButton from './LinkButton.astro';
+import Logo from '../assets/logo.svg';
+---
+<section class="flex flex-col items-center text-center">
+  <div class="content">
+    <h1 class="text-4xl md:text-5xl mb-4">Hola 👋. Bienvenido a Zicca</h1>
+    <p class="text-xl mb-8 text-gray-600">¿Ya eres cliente o eres nuevo?</p>
+    <section class="flex gap-6 flex-wrap justify-center">
+      <LinkButton href="/client" text="Ya soy cliente" />
+      <LinkButton href="/register" text="Soy nuevo" />
+    </section>
+  </div>
+</section>

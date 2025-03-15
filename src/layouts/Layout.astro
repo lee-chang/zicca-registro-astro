@@ -1,0 +1,29 @@
+---
+import "../styles/global.css";
+
+import background from "../assets/background.svg";
+
+import { ClientRouter } from "astro:transitions";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Zicca | Registro</title>
+    <ClientRouter />
+  </head>
+  <body>
+    <div class="relative">
+      <img
+        src={background.src}
+        alt=""
+        class="fixed inset-0 w-full h-full z-[-1] blur-[120px]"
+      />
+      <slot />
+    </div>
+  </body>
+</html>
