@@ -30,14 +30,8 @@ export default defineConfig({
     platformProxy: {
       enabled: true, // Emula el entorno Cloudflare durante el desarrollo
     },
-    routes: {
-      extend: {
-        include: [
-          { pattern: '/api/*' }, // Asegura que todas las rutas API se procesen correctamente
-        ],
-      }
-    },
-    // Habilitamos el soporte para módulos Cloudflare (.wasm, .bin, .txt)
+    // Eliminamos la configuración de routes.extend que causaba conflicto
+    // Astro generará automáticamente las rutas API correctamente
     cloudflareModules: true,
   }),
   image: { service: passthroughImageService() },
