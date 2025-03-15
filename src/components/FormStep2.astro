@@ -1,0 +1,93 @@
+---
+// FormStep2.astro - Segunda sección del formulario
+---
+
+<div class="flex flex-col md:flex-row w-full rounded-lg shadow-lg bg-white overflow-hidden step-container" id="step-2">
+  <div class="md:w-1/2">
+    <img src="/images/form-preventzicca1.png" alt="Formulario Zicca" class="w-full h-full object-cover" />
+  </div>
+  <div class="p-8 md:w-1/2">
+    <div class="mb-6 text-center">
+      <h3 class="text-2xl font-bold text-gray-800">Registro de Cliente</h3>
+    </div>
+    <p class="mb-6 text-center text-gray-600">Por favor complete la dirección de envío</p>
+    
+    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
+      <div class="w-full md:w-1/2">
+        <select
+          name="departamentos"
+          id="departamentos"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        >
+          <option value="" disabled selected>Departamentos...</option>
+        </select>
+      </div>
+      <div class="w-full md:w-1/2">
+        <select
+          name="provincias"
+          id="provincias"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        >
+          <option value="" disabled selected>Provincias...</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
+      <div class="w-full md:w-1/2">
+        <select
+          name="distritos"
+          id="distritos"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        >
+          <option value="" disabled selected>Distritos...</option>
+        </select>
+      </div>
+      <div class="w-full md:w-1/2">
+        <input
+          type="text"
+          name="referencia"
+          placeholder="Referencia"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+      </div>
+    </div>
+    
+    <div class="mb-4">
+      <div class="w-full">
+        <input
+          type="text"
+          name="direccion"
+          placeholder="Dirección"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
+        />
+      </div>
+    </div>
+    
+    <div class="flex justify-between mt-8">
+      <button type="button" class="btn-atras px-6 py-2 bg-gray-600 text-white rounded-lg flex items-center hover:bg-gray-700 transition duration-300">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Atrás
+      </button>
+
+      <button
+        id="enviarBtn"
+        type="submit"
+        name="enviar"
+        class="btn-registro px-6 py-2 bg-blue-600 text-white rounded-lg flex items-center hover:bg-blue-700 transition duration-300"
+      >
+        Enviar
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
