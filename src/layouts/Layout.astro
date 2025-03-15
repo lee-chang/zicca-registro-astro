@@ -2,21 +2,28 @@
 import "../styles/global.css";
 
 import background from "../assets/background.svg";
-
 import { ClientRouter } from "astro:transitions";
+interface Props {
+  title?: string;
+}
+
+import { Toaster } from "../components/ui/sonner.tsx";
+
+const { title = "Zicca | Registro" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>Zicca | Registro</title>
+    <title>{title}</title>
+
     <ClientRouter />
   </head>
-  <body>
+  <body class="bg-gray-100 min-h-screen">
     <div class="relative">
       <img
         src={background.src}
@@ -25,5 +32,6 @@ import { ClientRouter } from "astro:transitions";
       />
       <slot />
     </div>
+    <Toaster richColors  client:load/>
   </body>
 </html>
