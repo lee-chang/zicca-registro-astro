@@ -20,7 +20,7 @@ export default defineConfig({
     },
     ssr: {
       // Añade aquí cualquier módulo de Node.js que necesites
-      external: ['node:buffer', 'node:crypto', 'node:fs', 'node:path', 'node:stream', 'node:util'],
+      external: ['node:buffer', 'node:crypto', 'node:fs', 'node:path', 'node:stream', 'node:util', 'react', 'react-dom'],
     },
   },
   integrations: [react()],
@@ -30,9 +30,6 @@ export default defineConfig({
     platformProxy: {
       enabled: true, // Emula el entorno Cloudflare durante el desarrollo
     },
-    // Eliminamos la configuración de routes.extend que causaba conflicto
-    // Astro generará automáticamente las rutas API correctamente
-    cloudflareModules: true,
   }),
   image: { service: passthroughImageService() },
 });

@@ -1,6 +1,6 @@
 ---
-import FormStep1 from './FormStep1.astro';
-import FormStep2 from './FormStep2.astro';
+import FormStep1 from "./FormStep1.astro";
+import FormStep2 from "./FormStep2.astro";
 ---
 
 <form id="registro-form" class="w-full max-w-4xl mx-auto">
@@ -16,7 +16,7 @@ import FormStep2 from './FormStep2.astro';
 </form>
 
 <script>
-  import { toast } from 'sonner';
+  import { toast } from "sonner";
 
   // Interfaz para los datos del formulario
   interface FormData {
@@ -36,236 +36,263 @@ import FormStep2 from './FormStep2.astro';
 
   // Manejo de los pasos del formulario
   let currentStep = 1;
-  
+
   // Función para cambiar al paso indicado
   function goToStep(step: number) {
     // Ocultar todos los pasos
-    document.querySelectorAll('.step').forEach(element => {
+    document.querySelectorAll(".step").forEach((element) => {
       if (element instanceof HTMLElement) {
-        element.classList.add('hidden');
-        element.classList.remove('block');
+        element.classList.add("hidden");
+        element.classList.remove("block");
       }
     });
-    
+
     // Mostrar el paso actual
     const currentStepElement = document.getElementById(`step-${step}`);
     if (currentStepElement) {
-      currentStepElement.classList.remove('hidden');
-      currentStepElement.classList.add('block');
-      
+      currentStepElement.classList.remove("hidden");
+      currentStepElement.classList.add("block");
+
       // Si estamos en el paso 2, cargar los departamentos
       if (step === 2) {
         loadDepartamentos();
       }
     }
-    
+
     // Actualizar el paso actual
     currentStep = step;
   }
-  
+
   // Cargar departamentos
   function loadDepartamentos(): void {
-    const iDepartment = document.querySelector("select[name='departamentos']") as HTMLSelectElement | null;
-    
+    const iDepartment = document.querySelector(
+      "select[name='departamentos']"
+    ) as HTMLSelectElement | null;
+
     if (iDepartment) {
       // Solo cargar si no hay opciones ya cargadas (excepto la primera)
       if (iDepartment.options.length <= 1) {
-        fetch('/api/departamentos')
-          .then(response => response.json())
-          .then(data => {
+        fetch("/api/proxy/departamentos-proxy")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
             if (iDepartment) {
-              let html_select = '<option value="" disabled selected>Departamentos...</option>';
-              data.forEach((item: { value: string, label: string }) => {
-                html_select += `<option value="${item.value}">${item.label}</option>`;
+              let html_select =
+                '<option value="" disabled selected>Departamentos...</option>';
+              data.forEach((item: { idDepartamento: string; nombre: string }) => {
+                html_select += `<option value="${item.idDepartamento}">${item.nombre}</option>`;
               });
               iDepartment.innerHTML = html_select;
             }
           })
-          .catch(error => console.error('Error:', error));
+          .catch((error) => console.error("Error:", error));
       }
     }
   }
-  
+
   // Validar campos
   function validFormData(): boolean {
     // Obtener todos los campos requeridos
-    const requiredFields = document.querySelectorAll('[required]');
-    const allFields = Array.from(requiredFields).every(field => {
-      if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
-        return field.value.trim() !== '';
+    const requiredFields = document.querySelectorAll("[required]");
+    const allFields = Array.from(requiredFields).every((field) => {
+      if (
+        field instanceof HTMLInputElement ||
+        field instanceof HTMLSelectElement
+      ) {
+        return field.value.trim() !== "";
       }
       return true;
     });
-    
+
     if (!allFields) {
       toast.error("Ups! Algo salió mal", {
-        description: "Por favor complete todos los campos requeridos"
+        description: "Por favor complete todos los campos requeridos",
       });
       return false;
     }
-    
+
     return true;
   }
-  
+
   // Inicialización del formulario cuando se carga la página
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // Configurar eventos de botones
     setupButtonEvents();
-    
+
     // Configurar eventos de selects para ubicaciones
     setupLocationFieldEvents();
-    
+
     // Configurar envío del formulario
     setupFormSubmission();
   });
-  
+
   // Configurar eventos de botones
   function setupButtonEvents(): void {
     // Botón Siguiente
-    const btnSiguiente = document.querySelector('.btn-siguiente');
+    const btnSiguiente = document.querySelector(".btn-siguiente");
     if (btnSiguiente) {
-      btnSiguiente.addEventListener('click', function(e) {
+      btnSiguiente.addEventListener("click", function (e) {
         e.preventDefault();
         goToStep(2);
       });
     }
-    
+
     // Botón Atrás
-    const btnAtras = document.querySelector('.btn-atras');
+    const btnAtras = document.querySelector(".btn-atras");
     if (btnAtras) {
-      btnAtras.addEventListener('click', function(e) {
+      btnAtras.addEventListener("click", function (e) {
         e.preventDefault();
         goToStep(1);
       });
     }
   }
-  
+
   // Configurar eventos de campos de ubicación
   function setupLocationFieldEvents(): void {
-    const iDepartment = document.querySelector("select[name='departamentos']") as HTMLSelectElement | null;
-    const iProvince = document.querySelector("select[name='provincias']") as HTMLSelectElement | null;
-    
+    const iDepartment = document.querySelector(
+      "select[name='departamentos']"
+    ) as HTMLSelectElement | null;
+    const iProvince = document.querySelector(
+      "select[name='provincias']"
+    ) as HTMLSelectElement | null;
+
     if (iDepartment) {
-      iDepartment.addEventListener('change', function() {
+      iDepartment.addEventListener("change", function () {
         const idDepartamento = this.value;
-        
+
         if (iProvince) {
-          fetch('/api/provincias', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idDepartamento })
+          fetch("/api/proxy/provincias-proxy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idDepartamento }),
           })
-          .then(response => response.json())
-          .then(data => {
-            if (iProvince) {
-              let html_select = '<option value="" disabled selected>Provincias...</option>';
-              data.forEach((item: { value: string, label: string }) => {
-                html_select += `<option value="${item.value}">${item.label}</option>`;
-              });
-              iProvince.innerHTML = html_select;
-              
-              // Limpiar distritos cuando se cambia la provincia
-              const iDistrict = document.querySelector("select[name='distritos']") as HTMLSelectElement | null;
-              if (iDistrict) {
-                iDistrict.innerHTML = '<option value="" disabled selected>Distritos...</option>';
+            .then((response) => response.json())
+            .then((data) => {
+              if (iProvince) {
+                let html_select =
+                  '<option value="" disabled selected>Provincias...</option>';
+                data.forEach(
+                  (item: { idProvincia: string; nombre: string }) => {
+                    html_select += `<option value="${item.idProvincia}">${item.nombre}</option>`;
+                  }
+                );
+                iProvince.innerHTML = html_select;
+
+                // Limpiar distritos cuando se cambia la provincia
+                const iDistrict = document.querySelector(
+                  "select[name='distritos']"
+                ) as HTMLSelectElement | null;
+                if (iDistrict) {
+                  iDistrict.innerHTML =
+                    '<option value="" disabled selected>Distritos...</option>';
+                }
               }
-            }
-          })
-          .catch(error => console.error('Error:', error));
+            })
+            .catch((error) => console.error("Error:", error));
         }
       });
     }
-    
+
     if (iProvince) {
-      iProvince.addEventListener('change', function() {
+      iProvince.addEventListener("change", function () {
         const idProvincia = this.value;
-        const iDistrict = document.querySelector("select[name='distritos']") as HTMLSelectElement | null;
-        
+        const iDistrict = document.querySelector(
+          "select[name='distritos']"
+        ) as HTMLSelectElement | null;
+
         if (iDistrict) {
-          fetch('/api/distritos', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idProvincia })
+          fetch("/api/proxy/distritos-proxy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idProvincia }),
           })
-          .then(response => response.json())
-          .then(data => {
-            if (iDistrict) {
-              let html_select = '<option value="" disabled selected>Distritos...</option>';
-              data.forEach((item: { value: string, label: string }) => {
-                html_select += `<option value="${item.value}">${item.label}</option>`;
-              });
-              iDistrict.innerHTML = html_select;
-            }
-          })
-          .catch(error => console.error('Error:', error));
+            .then((response) => response.json())
+            .then((data) => {
+              if (iDistrict) {
+                let html_select =
+                  '<option value="" disabled selected>Distritos...</option>';
+                data.forEach((item: { idDistrito: string; nombre: string }) => {
+                  html_select += `<option value="${item.idDistrito}">${item.nombre}</option>`;
+                });
+                iDistrict.innerHTML = html_select;
+              }
+            })
+            .catch((error) => console.error("Error:", error));
         }
       });
     }
   }
-  
+
   // Configurar envío del formulario
   function setupFormSubmission(): void {
-    const form = document.getElementById('registro-form') as HTMLFormElement;
-    
+    const form = document.getElementById("registro-form") as HTMLFormElement;
+
     if (form) {
-      form.addEventListener('submit', function(e) {
+      form.addEventListener("submit", function (e) {
         e.preventDefault();
-        
+
         console.log("validando");
         const valid = validFormData();
         if (!valid) return;
-        
-        const enviarBtn = document.getElementById('enviarBtn') as HTMLButtonElement | null;
+
+        const enviarBtn = document.getElementById(
+          "enviarBtn"
+        ) as HTMLButtonElement | null;
         if (enviarBtn) {
           enviarBtn.disabled = true;
         }
-        
+
         console.log("Procesando envío");
-        
+
         // Recoger todos los datos del formulario
         const formData: Record<string, string> = {};
-        const inputs = form.querySelectorAll('input, select');
-        inputs.forEach(input => {
-          if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement) {
+        const inputs = form.querySelectorAll("input, select");
+        inputs.forEach((input) => {
+          if (
+            input instanceof HTMLInputElement ||
+            input instanceof HTMLSelectElement
+          ) {
             if (input.name && input.value) {
               formData[input.name] = input.value;
             }
           }
         });
-        
-        fetch('/api/registro', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
+
+        fetch("/api/proxy/registro-proxy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
         })
-        .then(response => {
-          if (!response.ok) {
-            return response.text().then(text => { throw new Error(text); });
-          }
-          return response.text();
-        })
-        .then(data => {
-          console.log("Se envió correctamente");
-          toast.success("Completado", {
-            description: "Se ha registrado correctamente"
+          .then((response) => {
+            if (!response.ok) {
+              return response.text().then((text) => {
+                throw new Error(text);
+              });
+            }
+            return response.text();
+          })
+          .then((data) => {
+            console.log("Se envió correctamente");
+            toast.success("Completado", {
+              description: "Se ha registrado correctamente",
+            });
+            if (enviarBtn) {
+              enviarBtn.disabled = false;
+            }
+
+            // Volver al primer paso y limpiar el formulario
+            form.reset();
+            goToStep(1);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            toast.error("Ups! Algo salió mal", {
+              description: error.message || "Error al procesar la solicitud",
+            });
+            if (enviarBtn) {
+              enviarBtn.disabled = false;
+            }
           });
-          if (enviarBtn) {
-            enviarBtn.disabled = false;
-          }
-          
-          // Volver al primer paso y limpiar el formulario
-          form.reset();
-          goToStep(1);
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          toast.error("Ups! Algo salió mal", {
-            description: error.message || "Error al procesar la solicitud"
-          });
-          if (enviarBtn) {
-            enviarBtn.disabled = false;
-          }
-        });
       });
     }
   }

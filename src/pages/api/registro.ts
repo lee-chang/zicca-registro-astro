@@ -1,16 +1,19 @@
 import { APIRoute } from "astro";
+// Cambiamos las importaciones para usar el servicio de Cloudflare
 import {
   existUser,
   lastIdPerson,
   lastIdPersonDirection,
   postCreateRowInDirectionPerson,
   postCreateRowInPerson,
-} from "../../../utils/db";
+} from "../../utils/db-cloudflare";
+import { applyCorsHeaders, handleOptions } from "../../utils/cors";
 
-export const prerender = false
-
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
+    // Usar los bindings de Cloudflare si están disponibles
+    // const runtime = locals.runtime;
+    
     // Obtener valores de la solicitud POST
     const {
       tipoIdentidad,
@@ -28,7 +31,6 @@ export const POST: APIRoute = async ({ request }) => {
     } = await request.json();
 
     // Verificar si el usuario ya existe
-
     const isExistUser = await existUser(tipoIdentidad, nroIdentidad);
     // console.log(isExistUser);
     if (isExistUser) throw new Error("El usuario ya existe");
@@ -47,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const newDireccion = direccion + ". Referencia: " + referencia;
 
-    // Insertar los datos en la tabla Persona
+    // Insertar los datos en la tabla Persona usando el servicio compatible con Cloudflare
     const resCreatePerson = await postCreateRowInPerson(
       idPersona,
       tipoIdentidad,
@@ -61,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
       fechaRegistro
     );
 
-    // Insertar los datos en la tabla PersonaDirección
+    // Insertar los datos en la tabla PersonaDirección usando el servicio compatible con Cloudflare
     const resCreateDirectionPerson = await postCreateRowInDirectionPerson(
       idPersonaDireccion,
       idPersona,
@@ -71,23 +73,18 @@ export const POST: APIRoute = async ({ request }) => {
       newDireccion
     );
 
-    // console.log({idPersona,idPersonaDireccion,fechaRegistro, tipoIdentidad, nroIdentidad, nombre, apellidoPaterno, apellidoMaterno, email, newDireccion, telefonos, departamentos, provincias, distritos});
-
-    // console.log(resCreatePerson);
-    // console.log(resCreateDirectionPerson);
-
     if (!resCreatePerson)
       throw new Error("Error al insertar los datos personales");
     if (!resCreateDirectionPerson)
       throw new Error("Error al insertar los datos de dirección");
 
-    // Ejemplo de respuesta en caso de éxito
-    return new Response("OK", { status: 200 });
+    // Aplicar CORS a la respuesta exitosa
+    return applyCorsHeaders(new Response("OK", { status: 200 }), request);
   } catch (err) {
     console.error("Error al ejecutar la consulta:", err);
-    // Ejemplo de respuesta en caso de error
 
     let message = err.message ? err.message : "Error al insertar los datos";
-    return new Response(message, { status: 500 });
+    // Aplicar CORS a la respuesta de error
+    return applyCorsHeaders(new Response(message, { status: 500 }), request);
   }
 };

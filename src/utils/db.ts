@@ -63,6 +63,7 @@ const dbConfig: sql.config = {
 };
 
 export async function getDepartamentos(): Promise<Departamento[]> {
+  console.log(dbConfig);
   const pool = await sql.connect(dbConfig);
   try {
     const query = "SELECT * FROM MAN.Departamento";
