@@ -1,6 +1,6 @@
 import { APIRoute } from "astro";
-import { applyCorsHeaders } from "../../../utils/cors";
-import { lastIdPerson } from "../../../utils/db";
+import { applyCorsHeaders } from "../../utils/cors";
+import { lastIdPerson } from "../../utils/db-cloudflare";
 
 export const GET: APIRoute = async ({ request }) => {
   try {

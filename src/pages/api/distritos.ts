@@ -1,61 +1,52 @@
 import { APIRoute } from "astro";
-// Cambiamos la importación para usar el servicio de Cloudflare
-import { getDistritos } from "../../utils/db-cloudflare";
-import { applyCorsHeaders, handleOptions } from "../../utils/cors";
+import { applyCorsHeaders } from "../../utils/cors";
+import { obtenerDistritosComoOpciones } from "../../helpers/registro-helpers";
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   try {
-    // Usar los bindings de Cloudflare si están disponibles
-    // const runtime = locals.runtime;
-    
-    // Obtener el idProvincia del cuerpo de la solicitud
     const body = await request.json();
-    const idProvincia = body.idProvincia;
-    
+    const { idProvincia } = body;
+
     if (!idProvincia) {
       return applyCorsHeaders(
         new Response(
-          JSON.stringify("El ID de la provincia es necesario"),
+          JSON.stringify({ error: "El ID de la provincia es necesario" }),
           {
             status: 400,
             headers: {
               "Content-Type": "application/json",
             },
           }
-        ), request
+        ),
+        request
       );
     }
-    
-    // Obtener los distritos para la provincia usando el servicio compatible con Cloudflare
-    const distritos = await getDistritos(idProvincia);
-    
-    // Convertir a formato de opciones
-    const options = distritos.map((dist) => ({
-      value: dist.idDistrito,
-      label: dist.nombre,
-    }));
-    
-    // Devolver respuesta con los datos y CORS headers
+
+    // Usar la función helper para obtener distritos como opciones
+    const distritosOpciones = await obtenerDistritosComoOpciones(idProvincia);
+
     return applyCorsHeaders(
-      new Response(JSON.stringify(options), {
+      new Response(JSON.stringify(distritosOpciones), {
         status: 200,
         headers: {
           "Content-Type": "application/json",
         },
-      }), request
+      }),
+      request
     );
   } catch (error) {
     console.error(error);
     return applyCorsHeaders(
       new Response(
-        JSON.stringify("Error al obtener la lista de distritos"),
+        JSON.stringify({ error: "Error al obtener los distritos", details: error.message }),
         {
           status: 500,
           headers: {
             "Content-Type": "application/json",
           },
         }
-      ), request
+      ),
+      request
     );
   }
 };

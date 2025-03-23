@@ -1,6 +1,6 @@
 import { APIRoute } from "astro";
-import { applyCorsHeaders } from "../../../utils/cors";
-import { existUser } from "../../../utils/db";
+import { applyCorsHeaders } from "../../utils/cors";
+import { verificarUsuarioExistente } from "../../helpers/registro-helpers";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -22,7 +22,8 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const userExists = await existUser(tipoIdentidad, nroIdentidad);
+    // Usar la función helper para verificar si el usuario existe
+    const userExists = await verificarUsuarioExistente(tipoIdentidad, nroIdentidad);
 
     return applyCorsHeaders(
       new Response(

@@ -1,25 +1,14 @@
 import { APIRoute } from "astro";
 import { applyCorsHeaders } from "../../utils/cors";
-// Cambiamos la importación para usar el servicio de Cloudflare
-import { getDepartamentos } from "../../utils/db-cloudflare";
+import { obtenerDepartamentosComoOpciones } from "../../helpers/registro-helpers";
 
-export const GET: APIRoute = async ({ request, locals }) => {
+export const GET: APIRoute = async ({ request }) => {
   try {
-    // Usar los bindings de Cloudflare si están disponibles
-    // const runtime = locals.runtime;
-
-    // Obtener los departamentos usando el servicio compatible con Cloudflare
-    const departamentos = await getDepartamentos();
+    // Usar la función helper para obtener departamentos como opciones
+    const departamentosOpciones = await obtenerDepartamentosComoOpciones();
     
-    // Convertir a formato de opciones
-    const options = departamentos.map((dep) => ({
-      value: dep.idDepartamento,
-      label: dep.nombre,
-    }));
-
-    // Devolver respuesta con los datos y CORS headers
     return applyCorsHeaders(
-      new Response(JSON.stringify(options), {
+      new Response(JSON.stringify(departamentosOpciones), {
         status: 200,
         headers: {
           "Content-Type": "application/json",
@@ -31,7 +20,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     console.error(error);
     return applyCorsHeaders(
       new Response(
-        JSON.stringify("Error al obtener la lista de departamentos"),
+        JSON.stringify({ error: "Error al obtener los departamentos", details: error.message }),
         {
           status: 500,
           headers: {

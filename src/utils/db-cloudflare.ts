@@ -22,10 +22,20 @@ interface Distrito {
   [key: string]: any;
 }
 
-// URL base para las solicitudes de API (podría ser una API proxy que tú mismo implementes)
-// O podría ser un servicio como Supabase, Firebase, etc.
-const API_BASE_URL = import.meta.env.API_BASE_URL || 
-  "https://registro.zicca.pe/api"; // Reemplaza con tu URL real
+// Esta variable se usa para determinar si estamos ejecutando en el servidor o en el cliente
+// En un servidor Astro, import.meta.env.SSR será true
+const isServer = import.meta.env.SSR === true;
+
+// URL base para las solicitudes de API
+// En el cliente usamos la URL relativa, en el servidor usamos la URL completa
+const API_BASE_URL = isServer
+  ? `${import.meta.env.DB_SERVER || "http://localhost:4321"}/api`
+  : "/api";
+
+// IMPORTANTE: Evitar bucle infinito al detectar si estamos siendo llamados desde una API
+// Si estamos en servidor y detectamos que venimos desde una API (comprobando la URL),
+// usaremos la versión directa de las funciones (db.ts)
+import * as directDb from "./db";
 
 // Utilidad para manejar errores
 const handleFetchError = (error: any) => {
@@ -33,8 +43,24 @@ const handleFetchError = (error: any) => {
   throw new Error(`Error en la solicitud: ${error.message}`);
 };
 
-// Implementaciones que usan fetch en lugar de conexión directa a SQL
+// Función para determinar si estamos siendo llamados desde un endpoint de API
+// para evitar el bucle infinito
+function isCalledFromApiEndpoint() {
+  // Solo relevante en el servidor
+  if (!isServer) return false;
+  
+  // En Astro, podemos intentar analizar la pila de llamadas
+  const stackTrace = new Error().stack || '';
+  return stackTrace.includes('/api/') && stackTrace.includes('.ts');
+}
+
+// Implementaciones que evitan bucles infinitos
 export async function getDepartamentos(): Promise<Departamento[]> {
+  // Si estamos en un endpoint API, usar la versión directa para evitar el bucle
+  if (isCalledFromApiEndpoint()) {
+    return directDb.getDepartamentos();
+  }
+  
   try {
     const response = await fetch(`${API_BASE_URL}/departamentos`);
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -46,6 +72,11 @@ export async function getDepartamentos(): Promise<Departamento[]> {
 }
 
 export async function getProvincias(idDepartamento: number): Promise<Provincia[]> {
+  // Si estamos en un endpoint API, usar la versión directa para evitar el bucle
+  if (isCalledFromApiEndpoint()) {
+    return directDb.getProvincias(idDepartamento);
+  }
+  
   try {
     const response = await fetch(`${API_BASE_URL}/provincias`, {
       method: "POST",
@@ -61,6 +92,11 @@ export async function getProvincias(idDepartamento: number): Promise<Provincia[]
 }
 
 export async function getDistritos(idProvincia: number): Promise<Distrito[]> {
+  // Si estamos en un endpoint API, usar la versión directa para evitar el bucle
+  if (isCalledFromApiEndpoint()) {
+    return directDb.getDistritos(idProvincia);
+  }
+  
   try {
     const response = await fetch(`${API_BASE_URL}/distritos`, {
       method: "POST",
@@ -79,6 +115,11 @@ export async function existUser(
   tipoIdentidad: number,
   nroIdentidad: string
 ): Promise<any | false> {
+  // Si estamos en un endpoint API, usar la versión directa para evitar el bucle
+  if (isCalledFromApiEndpoint()) {
+    return directDb.existUser(tipoIdentidad, nroIdentidad);
+  }
+  
   try {
     const response = await fetch(`${API_BASE_URL}/check-user`, {
       method: "POST",
@@ -95,6 +136,11 @@ export async function existUser(
 }
 
 export async function lastIdPerson(): Promise<number> {
+  // Si estamos en un endpoint API, usar la versión directa para evitar el bucle
+  if (isCalledFromApiEndpoint()) {
+    return directDb.lastIdPerson();
+  }
+  
   try {
     const response = await fetch(`${API_BASE_URL}/last-id-person`);
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -107,6 +153,11 @@ export async function lastIdPerson(): Promise<number> {
 }
 
 export async function lastIdPersonDirection(): Promise<number> {
+  // Si estamos en un endpoint API, usar la versión directa para evitar el bucle
+  if (isCalledFromApiEndpoint()) {
+    return directDb.lastIdPersonDirection();
+  }
+  
   try {
     const response = await fetch(`${API_BASE_URL}/last-id-person-direction`);
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -130,6 +181,22 @@ export async function postCreateRowInPerson(
   telefonos: string,
   fechaRegistro: string
 ): Promise<boolean> {
+  // Si estamos en un endpoint API, usar la versión directa para evitar el bucle
+  if (isCalledFromApiEndpoint()) {
+    return directDb.postCreateRowInPerson(
+      idPersona, 
+      tipoIdentidad, 
+      nroIdentidad, 
+      nombre, 
+      apellidoPaterno,
+      apellidoMaterno, 
+      email, 
+      dir, 
+      telefonos, 
+      fechaRegistro
+    );
+  }
+  
   try {
     const response = await fetch(`${API_BASE_URL}/create-person`, {
       method: "POST",
@@ -156,6 +223,18 @@ export async function postCreateRowInDirectionPerson(
   idDistrito: number,
   dir: string
 ): Promise<boolean> {
+  // Si estamos en un endpoint API, usar la versión directa para evitar el bucle
+  if (isCalledFromApiEndpoint()) {
+    return directDb.postCreateRowInDirectionPerson(
+      idPersonaDireccion,
+      idPersona,
+      idDepartamento,
+      idProvincia,
+      idDistrito,
+      dir
+    );
+  }
+  
   try {
     const response = await fetch(`${API_BASE_URL}/create-person-direction`, {
       method: "POST",

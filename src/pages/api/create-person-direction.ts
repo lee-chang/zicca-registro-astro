@@ -1,25 +1,21 @@
 import { APIRoute } from "astro";
-import { applyCorsHeaders } from "../../../utils/cors";
-import { postCreateRowInPerson } from "../../../utils/db";
+import { applyCorsHeaders } from "../../utils/cors";
+import { postCreateRowInDirectionPerson } from "../../utils/db-cloudflare";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
     const {
+      idPersonaDireccion,
       idPersona,
-      tipoIdentidad,
-      nroIdentidad,
-      nombre,
-      apellidoPaterno,
-      apellidoMaterno,
-      email,
-      dir,
-      telefonos,
-      fechaRegistro
+      idDepartamento,
+      idProvincia,
+      idDistrito,
+      dir
     } = body;
 
     // Validar campos requeridos
-    if (!idPersona || !tipoIdentidad || !nroIdentidad || !nombre || !apellidoPaterno) {
+    if (!idPersonaDireccion || !idPersona || !idDepartamento || !idProvincia || !idDistrito) {
       return applyCorsHeaders(
         new Response(
           JSON.stringify({ error: "Faltan campos requeridos" }),
@@ -34,17 +30,13 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const success = await postCreateRowInPerson(
+    const success = await postCreateRowInDirectionPerson(
+      idPersonaDireccion,
       idPersona,
-      tipoIdentidad,
-      nroIdentidad,
-      nombre,
-      apellidoPaterno,
-      apellidoMaterno || "",
-      email || "",
-      dir || "",
-      telefonos || "",
-      fechaRegistro
+      idDepartamento,
+      idProvincia,
+      idDistrito,
+      dir || ""
     );
 
     return applyCorsHeaders(
@@ -63,7 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
     console.error(error);
     return applyCorsHeaders(
       new Response(
-        JSON.stringify({ error: "Error al crear la persona", details: error.message }),
+        JSON.stringify({ error: "Error al crear la dirección de la persona", details: error.message }),
         {
           status: 500,
           headers: {
