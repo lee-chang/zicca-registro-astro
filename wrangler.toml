@@ -1,0 +1,15 @@
+name = "zicca-registro-astro"
+compatibility_date = "2023-12-01"
+main = "./dist/_worker.js"  # Punto de entrada principal para Cloudflare Workers
+
+# Configuración básica para Cloudflare Pages
+[site]
+bucket = "./dist"
+
+# Variables de entorno (puedes añadir las que necesites)
+[vars]
+NODE_ENV = "production"
+
+# Configuración para desarrollo local
+[dev]
+port = 8788

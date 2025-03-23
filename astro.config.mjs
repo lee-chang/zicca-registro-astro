@@ -19,16 +19,38 @@ export default defineConfig({
         : undefined,
     },
     ssr: {
-      // Añade aquí cualquier módulo de Node.js que necesites
-      external: ['node:buffer', 'node:crypto', 'node:fs', 'node:path', 'node:stream', 'node:util', 'react', 'react-dom'],
+      // Añade todos los módulos de Node.js necesarios para API routes
+      external: [
+        'node:buffer', 
+        'node:crypto', 
+        'node:fs', 
+        'node:path', 
+        'node:stream', 
+        'node:util',
+        'node:events',
+        'node:os',
+        'node:url',
+        'node:querystring',
+        'node:worker_threads',
+        'react', 
+        'react-dom'
+      ],
     },
   },
   integrations: [react()],
   output: "server",
   adapter: cloudflare({
-    imageService: "cloudflare",
+    imageService: "compile", // Cambiado de "cloudflare" a "compile" para mejor compatibilidad
     platformProxy: {
       enabled: true, // Emula el entorno Cloudflare durante el desarrollo
+      configPath: 'wrangler.toml',
+      persist: true,
+    },
+    // Configuración específica para asegurar que las rutas API funcionen
+    routes: {
+      extend: {
+        include: [{ pattern: '/api/*' }], // Asegura que todas las rutas API sean manejadas por SSR
+      }
     },
   }),
   image: { service: passthroughImageService() },
