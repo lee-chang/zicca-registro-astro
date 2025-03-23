@@ -1,6 +1,7 @@
 name = "zicca-registro-astro"
-compatibility_date = "2023-12-01"
+compatibility_date = "2024-09-23"  # Actualizado a la fecha recomendada
 main = "./dist/_worker.js"  # Punto de entrada principal para Cloudflare Workers
+compatibility_flags = ["nodejs_compat"]  # Habilita la compatibilidad con módulos de Node.js
 
 # Configuración básica para Cloudflare Pages
 [site]

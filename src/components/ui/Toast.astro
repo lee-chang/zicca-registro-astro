@@ -1,0 +1,181 @@
+---
+// Componente de notificaciones para Astro con Tailwind CSS
+---
+
+<div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 w-full max-w-xs"></div>
+
+<script>
+  // Tipos de toast
+  type ToastType = 'success' | 'error' | 'info' | 'warning';
+  
+  // Interfaz del objeto toast
+  interface ToastOptions {
+    title?: string;
+    description?: string;
+    duration?: number;
+    type?: ToastType;
+  }
+
+  // Clase de gestión de Toasts
+  class ToastManager {
+    private container: HTMLElement;
+    
+    constructor() {
+      this.container = document.getElementById('toast-container') as HTMLElement;
+    }
+
+    // Mostrar toast básico
+    show({
+      title = '',
+      description = '',
+      type = 'info',
+      duration = 3000
+    }: ToastOptions) {
+      if (!this.container) return;
+
+      // Crear el elemento toast
+      const toast = document.createElement('div');
+      toast.className = `toast-item flex items-center w-full max-w-xs p-4 mb-4 rounded-lg shadow transition-all transform translate-x-full opacity-0 ${this.getColorsByType(type)}`;
+      
+      // Crear el icono según el tipo
+      const icon = this.createIcon(type);
+      
+      // Estructura del toast
+      toast.innerHTML = `
+        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg ${this.getIconBgByType(type)}">
+          ${icon}
+        </div>
+        <div class="ml-3 text-sm font-normal">
+          ${title ? `<div class="text-sm font-semibold">${title}</div>` : ''}
+          <div class="text-sm">${description}</div>
+        </div>
+        <button type="button" class="ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex items-center justify-center h-8 w-8 hover:bg-gray-100/50 dark:hover:bg-gray-700/50" aria-label="Close">
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+          </svg>
+        </button>
+      `;
+      
+      // Agregar al contenedor
+      this.container.appendChild(toast);
+      
+      // Animar entrada
+      setTimeout(() => {
+        toast.classList.replace('translate-x-full', 'translate-x-0');
+        toast.classList.replace('opacity-0', 'opacity-100');
+      }, 10);
+      
+      // Configurar el botón de cierre
+      const closeButton = toast.querySelector('button');
+      if (closeButton) {
+        closeButton.addEventListener('click', () => {
+          this.removeToast(toast);
+        });
+      }
+      
+      // Auto-cerrar después de la duración
+      if (duration > 0) {
+        setTimeout(() => {
+          this.removeToast(toast);
+        }, duration);
+      }
+    }
+    
+    // Método para eliminar un toast con animación
+    private removeToast(toast: HTMLElement) {
+      toast.classList.replace('translate-x-0', 'translate-x-full');
+      toast.classList.replace('opacity-100', 'opacity-0');
+      
+      setTimeout(() => {
+        if (toast.parentNode === this.container) {
+          this.container.removeChild(toast);
+        }
+      }, 300);
+    }
+    
+    // Helper para obtener los colores según el tipo
+    private getColorsByType(type: ToastType): string {
+      switch (type) {
+        case 'success':
+          return 'text-green-800 bg-green-50 dark:text-green-400 dark:bg-gray-800';
+        case 'error':
+          return 'text-red-800 bg-red-50 dark:text-red-400 dark:bg-gray-800';
+        case 'warning':
+          return 'text-yellow-800 bg-yellow-50 dark:text-yellow-300 dark:bg-gray-800';
+        case 'info':
+        default:
+          return 'text-blue-800 bg-blue-50 dark:text-blue-400 dark:bg-gray-800';
+      }
+    }
+    
+    // Helper para obtener los colores de fondo del icono
+    private getIconBgByType(type: ToastType): string {
+      switch (type) {
+        case 'success':
+          return 'text-green-500 bg-green-100 dark:bg-green-800 dark:text-green-200';
+        case 'error':
+          return 'text-red-500 bg-red-100 dark:bg-red-800 dark:text-red-200';
+        case 'warning':
+          return 'text-yellow-500 bg-yellow-100 dark:bg-yellow-800 dark:text-yellow-200';
+        case 'info':
+        default:
+          return 'text-blue-500 bg-blue-100 dark:bg-blue-800 dark:text-blue-200';
+      }
+    }
+    
+    // Helper para crear el icono adecuado
+    private createIcon(type: ToastType): string {
+      switch (type) {
+        case 'success':
+          return `<svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                  </svg>`;
+        case 'error':
+          return `<svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                  </svg>`;
+        case 'warning':
+          return `<svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.489 2.112a1 1 0 0 1 1.98 0l5.366 16.101a1 1 0 0 1-.951 1.287H4.074a1 1 0 0 1-.95-1.287L8.49 2.112Z"/>
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 8v4"/>
+                    <path stroke="currentColor" d="M10 15h.01"/>
+                  </svg>`;
+        case 'info':
+        default:
+          return `<svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-8v-4m0 8h.01"/>
+                  </svg>`;
+      }
+    }
+    
+    // Métodos de conveniencia para diferentes tipos de toasts
+    success(options: Omit<ToastOptions, 'type'>) {
+      this.show({ ...options, type: 'success' });
+    }
+    
+    error(options: Omit<ToastOptions, 'type'>) {
+      this.show({ ...options, type: 'error' });
+    }
+    
+    warning(options: Omit<ToastOptions, 'type'>) {
+      this.show({ ...options, type: 'warning' });
+    }
+    
+    info(options: Omit<ToastOptions, 'type'>) {
+      this.show({ ...options, type: 'info' });
+    }
+  }
+  
+  // Crear una instancia global
+  const toast = new ToastManager();
+  
+  // Exponer al objeto window para poder usarlo en cualquier lugar
+  window.toast = toast;
+
+  // Declara el tipo global para TypeScript
+  declare global {
+    interface Window {
+      toast: ToastManager;
+    }
+  }
+</script>

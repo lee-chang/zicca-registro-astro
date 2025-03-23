@@ -39,6 +39,13 @@ import FormStep2 from "./FormStep2.astro";
 
   // Función para cambiar al paso indicado
   function goToStep(step: number) {
+    // Validar datos antes de avanzar al paso 2
+    if (step === 2 && currentStep === 1) {
+      if (!validateStep1()) {
+        return;
+      }
+    }
+
     // Ocultar todos los pasos
     document.querySelectorAll(".step").forEach((element) => {
       if (element instanceof HTMLElement) {
@@ -63,6 +70,64 @@ import FormStep2 from "./FormStep2.astro";
     currentStep = step;
   }
 
+  // Validar campos del paso 1
+  function validateStep1(): boolean {
+    const tipoIdentidad = (document.querySelector('select[name="tipoIdentidad"]') as HTMLSelectElement)?.value;
+    const nroIdentidad = (document.querySelector('input[name="nroIdentidad"]') as HTMLInputElement)?.value;
+    const nombre = (document.querySelector('input[name="nombre"]') as HTMLInputElement)?.value;
+    const apellidoPaterno = (document.querySelector('input[name="apellidoPaterno"]') as HTMLInputElement)?.value;
+    const apellidoMaterno = (document.querySelector('input[name="apellidoMaterno"]') as HTMLInputElement)?.value;
+    const email = (document.querySelector('input[name="email"]') as HTMLInputElement)?.value;
+    const telefonos = (document.querySelector('input[name="telefonos"]') as HTMLInputElement)?.value;
+
+    // Validar campos requeridos
+    if (!tipoIdentidad || !nroIdentidad || !nombre || !apellidoPaterno) {
+      toast.error("Campos incompletos", {
+        description: "Por favor complete todos los campos obligatorios"
+      });
+      return false;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (email && !emailRegex.test(email)) {
+      toast.error("Email inválido", {
+        description: "Por favor ingrese un email válido"
+      });
+      return false;
+    }
+
+    // Validar formato de teléfono
+    const telefonoRegex = /^[0-9]{9}$/;
+    if (telefonos && !telefonoRegex.test(telefonos)) {
+      toast.error("Teléfono inválido", {
+        description: "El teléfono debe tener 9 dígitos"
+      });
+      return false;
+    }
+
+    // Validar número de identidad según el tipo
+    if (tipoIdentidad === "DNI" && nroIdentidad) {
+      const dniRegex = /^[0-9]{8}$/;
+      if (!dniRegex.test(nroIdentidad)) {
+        toast.error("DNI inválido", {
+          description: "El DNI debe tener 8 dígitos numéricos"
+        });
+        return false;
+      }
+    } else if (tipoIdentidad === "CE" && nroIdentidad) {
+      // Validación para Carnet de Extranjería
+      if (nroIdentidad.length < 8 || nroIdentidad.length > 12) {
+        toast.error("Carnet de Extranjería inválido", {
+          description: "El número de CE debe tener entre 8 y 12 caracteres"
+        });
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   // Cargar departamentos
   function loadDepartamentos(): void {
     const iDepartment = document.querySelector(
@@ -72,10 +137,18 @@ import FormStep2 from "./FormStep2.astro";
     if (iDepartment) {
       // Solo cargar si no hay opciones ya cargadas (excepto la primera)
       if (iDepartment.options.length <= 1) {
-        fetch("/api/proxy/departamentos-proxy")
-          .then((response) => response.json())
+        // Mostrar indicador de carga
+        iDepartment.disabled = true;
+        iDepartment.innerHTML = '<option value="" disabled selected>Cargando departamentos...</option>';
+        
+        fetch("/api/departamentos")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Error al cargar departamentos");
+            }
+            return response.json();
+          })
           .then((data) => {
-            console.log(data);
             if (iDepartment) {
               let html_select =
                 '<option value="" disabled selected>Departamentos...</option>';
@@ -83,9 +156,17 @@ import FormStep2 from "./FormStep2.astro";
                 html_select += `<option value="${item.idDepartamento}">${item.nombre}</option>`;
               });
               iDepartment.innerHTML = html_select;
+              iDepartment.disabled = false;
             }
           })
-          .catch((error) => console.error("Error:", error));
+          .catch((error) => {
+            console.error("Error:", error);
+            toast.error("Error de conexión", {
+              description: "No se pudieron cargar los departamentos"
+            });
+            iDepartment.innerHTML = '<option value="" disabled selected>Error al cargar...</option>';
+            iDepartment.disabled = false;
+          });
       }
     }
   }
@@ -94,21 +175,45 @@ import FormStep2 from "./FormStep2.astro";
   function validFormData(): boolean {
     // Obtener todos los campos requeridos
     const requiredFields = document.querySelectorAll("[required]");
-    const allFields = Array.from(requiredFields).every((field) => {
+    let allFieldsValid = true;
+    
+    // Validar cada campo requerido
+    requiredFields.forEach((field) => {
       if (
         field instanceof HTMLInputElement ||
         field instanceof HTMLSelectElement
       ) {
-        return field.value.trim() !== "";
+        if (field.value.trim() === "") {
+          allFieldsValid = false;
+          // Agregar clase de error al campo
+          field.classList.add('border-red-500');
+        } else {
+          // Quitar clase de error si existe
+          field.classList.remove('border-red-500');
+        }
       }
-      return true;
     });
 
-    if (!allFields) {
-      toast.error("Ups! Algo salió mal", {
+    if (!allFieldsValid) {
+      toast.error("Campos incompletos", {
         description: "Por favor complete todos los campos requeridos",
       });
       return false;
+    }
+
+    // Validar dirección y ubicación completa en paso 2
+    if (currentStep === 2) {
+      const departamentos = (document.querySelector('select[name="departamentos"]') as HTMLSelectElement)?.value;
+      const provincias = (document.querySelector('select[name="provincias"]') as HTMLSelectElement)?.value;
+      const distritos = (document.querySelector('select[name="distritos"]') as HTMLSelectElement)?.value;
+      const direccion = (document.querySelector('input[name="direccion"]') as HTMLInputElement)?.value;
+      
+      if (!departamentos || !provincias || !distritos || !direccion) {
+        toast.error("Ubicación incompleta", {
+          description: "Por favor complete todos los campos de ubicación",
+        });
+        return false;
+      }
     }
 
     return true;
@@ -124,6 +229,9 @@ import FormStep2 from "./FormStep2.astro";
 
     // Configurar envío del formulario
     setupFormSubmission();
+
+    // Configurar eventos de validación en tiempo real
+    setupFieldValidation();
   });
 
   // Configurar eventos de botones
@@ -147,6 +255,70 @@ import FormStep2 from "./FormStep2.astro";
     }
   }
 
+  // Configurar validación en tiempo real de campos
+  function setupFieldValidation(): void {
+    // Validar email en tiempo real
+    const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement | null;
+    if (emailInput) {
+      emailInput.addEventListener('blur', function() {
+        if (this.value) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(this.value)) {
+            this.classList.add('border-red-500');
+            toast.error("Email inválido");
+          } else {
+            this.classList.remove('border-red-500');
+          }
+        }
+      });
+    }
+
+    // Validar teléfono en tiempo real
+    const telefonoInput = document.querySelector('input[name="telefonos"]') as HTMLInputElement | null;
+    if (telefonoInput) {
+      telefonoInput.addEventListener('blur', function() {
+        if (this.value) {
+          const telefonoRegex = /^[0-9]{9}$/;
+          if (!telefonoRegex.test(this.value)) {
+            this.classList.add('border-red-500');
+            toast.error("El teléfono debe tener 9 dígitos");
+          } else {
+            this.classList.remove('border-red-500');
+          }
+        }
+      });
+    }
+
+    // Validar DNI o CE en tiempo real
+    const nroIdentidadInput = document.querySelector('input[name="nroIdentidad"]') as HTMLInputElement | null;
+    const tipoIdentidadSelect = document.querySelector('select[name="tipoIdentidad"]') as HTMLSelectElement | null;
+    
+    if (nroIdentidadInput && tipoIdentidadSelect) {
+      nroIdentidadInput.addEventListener('blur', function() {
+        if (this.value) {
+          const tipoIdentidad = tipoIdentidadSelect.value;
+          
+          if (tipoIdentidad === "DNI") {
+            const dniRegex = /^[0-9]{8}$/;
+            if (!dniRegex.test(this.value)) {
+              this.classList.add('border-red-500');
+              toast.error("El DNI debe tener 8 dígitos numéricos");
+            } else {
+              this.classList.remove('border-red-500');
+            }
+          } else if (tipoIdentidad === "CE") {
+            if (this.value.length < 8 || this.value.length > 12) {
+              this.classList.add('border-red-500');
+              toast.error("El CE debe tener entre 8 y 12 caracteres");
+            } else {
+              this.classList.remove('border-red-500');
+            }
+          }
+        }
+      });
+    }
+  }
+
   // Configurar eventos de campos de ubicación
   function setupLocationFieldEvents(): void {
     const iDepartment = document.querySelector(
@@ -161,12 +333,21 @@ import FormStep2 from "./FormStep2.astro";
         const idDepartamento = this.value;
 
         if (iProvince) {
-          fetch("/api/proxy/provincias-proxy", {
+          // Indicador de carga
+          iProvince.disabled = true;
+          iProvince.innerHTML = '<option value="" disabled selected>Cargando provincias...</option>';
+          
+          fetch("/api/provincias", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ idDepartamento }),
           })
-            .then((response) => response.json())
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Error al cargar provincias");
+              }
+              return response.json();
+            })
             .then((data) => {
               if (iProvince) {
                 let html_select =
@@ -177,6 +358,7 @@ import FormStep2 from "./FormStep2.astro";
                   }
                 );
                 iProvince.innerHTML = html_select;
+                iProvince.disabled = false;
 
                 // Limpiar distritos cuando se cambia la provincia
                 const iDistrict = document.querySelector(
@@ -188,7 +370,14 @@ import FormStep2 from "./FormStep2.astro";
                 }
               }
             })
-            .catch((error) => console.error("Error:", error));
+            .catch((error) => {
+              console.error("Error:", error);
+              toast.error("Error de conexión", {
+                description: "No se pudieron cargar las provincias"
+              });
+              iProvince.innerHTML = '<option value="" disabled selected>Error al cargar...</option>';
+              iProvince.disabled = false;
+            });
         }
       });
     }
@@ -201,12 +390,21 @@ import FormStep2 from "./FormStep2.astro";
         ) as HTMLSelectElement | null;
 
         if (iDistrict) {
-          fetch("/api/proxy/distritos-proxy", {
+          // Indicador de carga
+          iDistrict.disabled = true;
+          iDistrict.innerHTML = '<option value="" disabled selected>Cargando distritos...</option>';
+          
+          fetch("/api/distritos", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ idProvincia }),
           })
-            .then((response) => response.json())
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Error al cargar distritos");
+              }
+              return response.json();
+            })
             .then((data) => {
               if (iDistrict) {
                 let html_select =
@@ -215,9 +413,17 @@ import FormStep2 from "./FormStep2.astro";
                   html_select += `<option value="${item.idDistrito}">${item.nombre}</option>`;
                 });
                 iDistrict.innerHTML = html_select;
+                iDistrict.disabled = false;
               }
             })
-            .catch((error) => console.error("Error:", error));
+            .catch((error) => {
+              console.error("Error:", error);
+              toast.error("Error de conexión", {
+                description: "No se pudieron cargar los distritos"
+              });
+              iDistrict.innerHTML = '<option value="" disabled selected>Error al cargar...</option>';
+              iDistrict.disabled = false;
+            });
         }
       });
     }
@@ -231,7 +437,6 @@ import FormStep2 from "./FormStep2.astro";
       form.addEventListener("submit", function (e) {
         e.preventDefault();
 
-        console.log("validando");
         const valid = validFormData();
         if (!valid) return;
 
@@ -240,9 +445,12 @@ import FormStep2 from "./FormStep2.astro";
         ) as HTMLButtonElement | null;
         if (enviarBtn) {
           enviarBtn.disabled = true;
+          enviarBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Enviando...`;
         }
-
-        console.log("Procesando envío");
 
         // Recoger todos los datos del formulario
         const formData: Record<string, string> = {};
@@ -258,7 +466,7 @@ import FormStep2 from "./FormStep2.astro";
           }
         });
 
-        fetch("/api/proxy/registro-proxy", {
+        fetch("/api/registro", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
@@ -266,18 +474,20 @@ import FormStep2 from "./FormStep2.astro";
           .then((response) => {
             if (!response.ok) {
               return response.text().then((text) => {
-                throw new Error(text);
+                throw new Error(text || "Error al procesar la solicitud");
               });
             }
             return response.text();
           })
           .then((data) => {
-            console.log("Se envió correctamente");
             toast.success("Completado", {
               description: "Se ha registrado correctamente",
             });
+            
+            // Restaurar el botón
             if (enviarBtn) {
               enviarBtn.disabled = false;
+              enviarBtn.innerHTML = "Enviar";
             }
 
             // Volver al primer paso y limpiar el formulario
@@ -289,8 +499,11 @@ import FormStep2 from "./FormStep2.astro";
             toast.error("Ups! Algo salió mal", {
               description: error.message || "Error al procesar la solicitud",
             });
+            
+            // Restaurar el botón
             if (enviarBtn) {
               enviarBtn.disabled = false;
+              enviarBtn.innerHTML = "Enviar";
             }
           });
       });

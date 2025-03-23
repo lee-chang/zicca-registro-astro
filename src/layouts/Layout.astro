@@ -1,13 +1,12 @@
 ---
 import "../styles/global.css";
+import Toast from "../components/ui/Toast.astro";
 
 import background from "../assets/background.svg";
 import { ClientRouter } from "astro:transitions";
 interface Props {
   title?: string;
 }
-
-import { Toaster } from "../components/ui/sonner.tsx";
 
 const { title = "Zicca | Registro" } = Astro.props;
 ---
@@ -32,6 +31,6 @@ const { title = "Zicca | Registro" } = Astro.props;
       />
       <slot />
     </div>
-    <Toaster richColors  client:load/>
+    <Toast />
   </body>
 </html>
