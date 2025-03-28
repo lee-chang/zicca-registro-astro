@@ -152,7 +152,7 @@ import FormStep2 from "./FormStep2.astro";
             return response.json();
           })
           .then((data) => {
-            console.log(data);
+            // console.log(data);
             if (iDepartment) {
               let html_select =
                 '<option value="" disabled selected>Departamentos...</option>';
@@ -505,10 +505,15 @@ import FormStep2 from "./FormStep2.astro";
             goToStep(1);
           })
           .catch((error) => {
-            console.error("Error:", error);
+            console.error("Error:", error); //Error: Error: {"error":"El usuario ya existe"}
+
+            error = JSON.parse(error.message);
+
+            const errorMessage = error.error ? error.error : "Error al procesar la solicitud";
+
             window.toast.error({
               title: "Ups! Algo salió mal",
-              description: error.error || "Error al procesar la solicitud",
+              description: errorMessage
             });
             
             // Restaurar el botón
