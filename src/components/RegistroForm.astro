@@ -152,11 +152,12 @@ import FormStep2 from "./FormStep2.astro";
             return response.json();
           })
           .then((data) => {
+            console.log(data);
             if (iDepartment) {
               let html_select =
                 '<option value="" disabled selected>Departamentos...</option>';
-              data.forEach((item: { idDepartamento: string; nombre: string }) => {
-                html_select += `<option value="${item.idDepartamento}">${item.nombre}</option>`;
+              data.forEach((item: { value: string; label: string }) => {
+                html_select += `<option value="${item.value}">${item.label}</option>`;
               });
               iDepartment.innerHTML = html_select;
               iDepartment.disabled = false;
@@ -359,8 +360,8 @@ import FormStep2 from "./FormStep2.astro";
                 let html_select =
                   '<option value="" disabled selected>Provincias...</option>';
                 data.forEach(
-                  (item: { idProvincia: string; nombre: string }) => {
-                    html_select += `<option value="${item.idProvincia}">${item.nombre}</option>`;
+                  (item: { value: string; label: string }) => {
+                    html_select += `<option value="${item.value}">${item.label}</option>`;
                   }
                 );
                 iProvince.innerHTML = html_select;
@@ -416,8 +417,8 @@ import FormStep2 from "./FormStep2.astro";
               if (iDistrict) {
                 let html_select =
                   '<option value="" disabled selected>Distritos...</option>';
-                data.forEach((item: { idDistrito: string; nombre: string }) => {
-                  html_select += `<option value="${item.idDistrito}">${item.nombre}</option>`;
+                data.forEach((item: { value: string; label: string }) => {
+                  html_select += `<option value="${item.value}">${item.label}</option>`;
                 });
                 iDistrict.innerHTML = html_select;
                 iDistrict.disabled = false;
@@ -507,7 +508,7 @@ import FormStep2 from "./FormStep2.astro";
             console.error("Error:", error);
             window.toast.error({
               title: "Ups! Algo salió mal",
-              description: error.message || "Error al procesar la solicitud",
+              description: error.message.error || "Error al procesar la solicitud",
             });
             
             // Restaurar el botón
