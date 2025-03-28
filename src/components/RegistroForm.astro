@@ -508,7 +508,7 @@ import FormStep2 from "./FormStep2.astro";
             console.error("Error:", error);
             window.toast.error({
               title: "Ups! Algo salió mal",
-              description: error.message.error || "Error al procesar la solicitud",
+              description: error.error || "Error al procesar la solicitud",
             });
             
             // Restaurar el botón
