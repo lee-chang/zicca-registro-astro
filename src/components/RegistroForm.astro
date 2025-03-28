@@ -16,8 +16,6 @@ import FormStep2 from "./FormStep2.astro";
 </form>
 
 <script>
-  import { toast } from "sonner";
-
   // Interfaz para los datos del formulario
   interface FormData {
     tipoIdentidad: string;
@@ -82,7 +80,8 @@ import FormStep2 from "./FormStep2.astro";
 
     // Validar campos requeridos
     if (!tipoIdentidad || !nroIdentidad || !nombre || !apellidoPaterno) {
-      toast.error("Campos incompletos", {
+      window.toast.error({
+        title: "Campos incompletos",
         description: "Por favor complete todos los campos obligatorios"
       });
       return false;
@@ -91,7 +90,8 @@ import FormStep2 from "./FormStep2.astro";
     // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email && !emailRegex.test(email)) {
-      toast.error("Email inválido", {
+      window.toast.error({
+        title: "Email inválido",
         description: "Por favor ingrese un email válido"
       });
       return false;
@@ -100,7 +100,8 @@ import FormStep2 from "./FormStep2.astro";
     // Validar formato de teléfono
     const telefonoRegex = /^[0-9]{9}$/;
     if (telefonos && !telefonoRegex.test(telefonos)) {
-      toast.error("Teléfono inválido", {
+      window.toast.error({
+        title: "Teléfono inválido",
         description: "El teléfono debe tener 9 dígitos"
       });
       return false;
@@ -110,7 +111,8 @@ import FormStep2 from "./FormStep2.astro";
     if (tipoIdentidad === "DNI" && nroIdentidad) {
       const dniRegex = /^[0-9]{8}$/;
       if (!dniRegex.test(nroIdentidad)) {
-        toast.error("DNI inválido", {
+        window.toast.error({
+          title: "DNI inválido",
           description: "El DNI debe tener 8 dígitos numéricos"
         });
         return false;
@@ -118,7 +120,8 @@ import FormStep2 from "./FormStep2.astro";
     } else if (tipoIdentidad === "CE" && nroIdentidad) {
       // Validación para Carnet de Extranjería
       if (nroIdentidad.length < 8 || nroIdentidad.length > 12) {
-        toast.error("Carnet de Extranjería inválido", {
+        window.toast.error({
+          title: "Carnet de Extranjería inválido",
           description: "El número de CE debe tener entre 8 y 12 caracteres"
         });
         return false;
@@ -161,7 +164,8 @@ import FormStep2 from "./FormStep2.astro";
           })
           .catch((error) => {
             console.error("Error:", error);
-            toast.error("Error de conexión", {
+            window.toast.error({
+              title: "Error de conexión",
               description: "No se pudieron cargar los departamentos"
             });
             iDepartment.innerHTML = '<option value="" disabled selected>Error al cargar...</option>';
@@ -195,7 +199,8 @@ import FormStep2 from "./FormStep2.astro";
     });
 
     if (!allFieldsValid) {
-      toast.error("Campos incompletos", {
+      window.toast.error({
+        title: "Campos incompletos",
         description: "Por favor complete todos los campos requeridos",
       });
       return false;
@@ -209,7 +214,8 @@ import FormStep2 from "./FormStep2.astro";
       const direccion = (document.querySelector('input[name="direccion"]') as HTMLInputElement)?.value;
       
       if (!departamentos || !provincias || !distritos || !direccion) {
-        toast.error("Ubicación incompleta", {
+        window.toast.error({
+          title: "Ubicación incompleta",
           description: "Por favor complete todos los campos de ubicación",
         });
         return false;
@@ -265,7 +271,7 @@ import FormStep2 from "./FormStep2.astro";
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (!emailRegex.test(this.value)) {
             this.classList.add('border-red-500');
-            toast.error("Email inválido");
+            window.toast.error({ title: "Email inválido" });
           } else {
             this.classList.remove('border-red-500');
           }
@@ -281,7 +287,7 @@ import FormStep2 from "./FormStep2.astro";
           const telefonoRegex = /^[0-9]{9}$/;
           if (!telefonoRegex.test(this.value)) {
             this.classList.add('border-red-500');
-            toast.error("El teléfono debe tener 9 dígitos");
+            window.toast.error({ title: "El teléfono debe tener 9 dígitos" });
           } else {
             this.classList.remove('border-red-500');
           }
@@ -302,14 +308,14 @@ import FormStep2 from "./FormStep2.astro";
             const dniRegex = /^[0-9]{8}$/;
             if (!dniRegex.test(this.value)) {
               this.classList.add('border-red-500');
-              toast.error("El DNI debe tener 8 dígitos numéricos");
+              window.toast.error({ title: "El DNI debe tener 8 dígitos numéricos" });
             } else {
               this.classList.remove('border-red-500');
             }
           } else if (tipoIdentidad === "CE") {
             if (this.value.length < 8 || this.value.length > 12) {
               this.classList.add('border-red-500');
-              toast.error("El CE debe tener entre 8 y 12 caracteres");
+              window.toast.error({ title: "El CE debe tener entre 8 y 12 caracteres" });
             } else {
               this.classList.remove('border-red-500');
             }
@@ -372,7 +378,8 @@ import FormStep2 from "./FormStep2.astro";
             })
             .catch((error) => {
               console.error("Error:", error);
-              toast.error("Error de conexión", {
+              window.toast.error({
+                title: "Error de conexión",
                 description: "No se pudieron cargar las provincias"
               });
               iProvince.innerHTML = '<option value="" disabled selected>Error al cargar...</option>';
@@ -418,7 +425,8 @@ import FormStep2 from "./FormStep2.astro";
             })
             .catch((error) => {
               console.error("Error:", error);
-              toast.error("Error de conexión", {
+              window.toast.error({
+                title: "Error de conexión",
                 description: "No se pudieron cargar los distritos"
               });
               iDistrict.innerHTML = '<option value="" disabled selected>Error al cargar...</option>';
@@ -480,7 +488,8 @@ import FormStep2 from "./FormStep2.astro";
             return response.text();
           })
           .then((data) => {
-            toast.success("Completado", {
+            window.toast.success({
+              title: "Completado",
               description: "Se ha registrado correctamente",
             });
             
@@ -496,7 +505,8 @@ import FormStep2 from "./FormStep2.astro";
           })
           .catch((error) => {
             console.error("Error:", error);
-            toast.error("Ups! Algo salió mal", {
+            window.toast.error({
+              title: "Ups! Algo salió mal",
               description: error.message || "Error al procesar la solicitud",
             });
             
