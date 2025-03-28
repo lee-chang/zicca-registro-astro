@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/_astro/*",
+    "/assets/*",
+    "/images/*",
+    "/*.svg",
+    "/*.ico",
+    "/*.png"
+  ],
+  "routes": [
+    {
+      "src": "/api/.*",
+      "dest": "/_worker.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/_worker.js"
+    }
+  ]
+}

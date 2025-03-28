@@ -10,5 +10,7 @@ type Runtime = import('@astrojs/cloudflare').Runtime<Env>;
 declare namespace App {
   interface Locals extends Runtime {
     // Puedes añadir propiedades adicionales aquí si lo necesitas
+    isCloudflare?: boolean;
+    runtime?: any;
   }
 }

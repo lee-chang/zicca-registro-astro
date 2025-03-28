@@ -29,7 +29,7 @@ const isServer = import.meta.env.SSR === true;
 // URL base para las solicitudes de API
 // En el cliente usamos la URL relativa, en el servidor usamos la URL completa
 const API_BASE_URL = isServer
-  ? `${import.meta.env.DB_SERVER || "http://localhost:4321"}/api`
+  ? `${import.meta.env.PUBLIC_API_URL || import.meta.env.SITE || "http://localhost:4321"}/api`
   : "/api";
 
 // IMPORTANTE: Evitar bucle infinito al detectar si estamos siendo llamados desde una API
@@ -49,9 +49,20 @@ function isCalledFromApiEndpoint() {
   // Solo relevante en el servidor
   if (!isServer) return false;
   
-  // En Astro, podemos intentar analizar la pila de llamadas
-  const stackTrace = new Error().stack || '';
-  return stackTrace.includes('/api/') && stackTrace.includes('.ts');
+  try {
+    // En Astro, podemos intentar analizar la pila de llamadas
+    const stackTrace = new Error().stack || '';
+    const isApi = stackTrace.includes('/api/') && stackTrace.includes('.ts');
+    
+    // Verificar si estamos en una ruta de API (esto es más confiable en Cloudflare)
+    const currentUrl = new URL(import.meta.url);
+    const isApiUrl = currentUrl.pathname.includes('/api/');
+    
+    return isApi || isApiUrl;
+  } catch (error) {
+    console.error('Error al detectar API endpoint:', error);
+    return false;
+  }
 }
 
 // Implementaciones que evitan bucles infinitos

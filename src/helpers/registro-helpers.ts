@@ -12,37 +12,53 @@ import {
 
 // Función para obtener los departamentos y formatearlos como opciones
 export async function obtenerDepartamentosComoOpciones() {
-  const departamentos = await getDepartamentos();
-  return departamentos.map((dep) => ({
-    value: dep.idDepartamento,
-    label: dep.nombre,
-  }));
+  try {
+    const departamentos = await getDepartamentos();
+    return departamentos.map((dep) => ({
+      value: dep.idDepartamento,
+      label: dep.nombre,
+    }));
+  } catch (error) {
+    console.error('Error al obtener departamentos:', error);
+    // Devolver un array vacío en caso de error para evitar que la aplicación se rompa
+    return [];
+  }
 }
 
 // Función para obtener las provincias y formatearlas como opciones
 export async function obtenerProvinciasComoOpciones(idDepartamento: number) {
-  if (!idDepartamento) {
-    throw new Error("El ID del departamento es necesario");
+  try {
+    if (!idDepartamento) {
+      throw new Error("El ID del departamento es necesario");
+    }
+    
+    const provincias = await getProvincias(idDepartamento);
+    return provincias.map((prov) => ({
+      value: prov.idProvincia,
+      label: prov.nombre,
+    }));
+  } catch (error) {
+    console.error('Error al obtener provincias:', error);
+    return [];
   }
-  
-  const provincias = await getProvincias(idDepartamento);
-  return provincias.map((prov) => ({
-    value: prov.idProvincia,
-    label: prov.nombre,
-  }));
 }
 
 // Función para obtener los distritos y formatearlos como opciones
 export async function obtenerDistritosComoOpciones(idProvincia: number) {
-  if (!idProvincia) {
-    throw new Error("El ID de la provincia es necesario");
+  try {
+    if (!idProvincia) {
+      throw new Error("El ID de la provincia es necesario");
+    }
+    
+    const distritos = await getDistritos(idProvincia);
+    return distritos.map((dist) => ({
+      value: dist.idDistrito,
+      label: dist.nombre,
+    }));
+  } catch (error) {
+    console.error('Error al obtener distritos:', error);
+    return [];
   }
-  
-  const distritos = await getDistritos(idProvincia);
-  return distritos.map((dist) => ({
-    value: dist.idDistrito,
-    label: dist.nombre,
-  }));
 }
 
 // Función para verificar si un usuario existe

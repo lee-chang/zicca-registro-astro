@@ -4,6 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 
 import cloudflare from "@astrojs/cloudflare";
 
+import vercel from '@astrojs/vercel';
+
 // https://astro.build/config
 export default defineConfig({
   vite: {
@@ -28,7 +30,12 @@ export default defineConfig({
         'node:path',
         'node:querystring',
         'node:worker_threads',
+        // Módulos que pueden causar problemas en Cloudflare
+        'mssql',
+        'tedious',
+        'tarn',
       ],
+      noExternal: ['clsx', 'tailwind-merge'],
     },
     // Optimizaciones adicionales para Cloudflare
     build: {
@@ -36,13 +43,6 @@ export default defineConfig({
     }
   },
   output: "server",
-  adapter: cloudflare({
-    imageService: "compile",
-    platformProxy: {
-      enabled: true,
-      configPath: 'wrangler.toml',
-      persist: true,
-    },
-  }),
+  adapter: vercel(),
   image: { service: passthroughImageService() },
 });

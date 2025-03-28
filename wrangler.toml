@@ -7,9 +7,15 @@ compatibility_flags = ["nodejs_compat"]  # Habilita la compatibilidad con módul
 [site]
 bucket = "./dist"
 
-# Variables de entorno (puedes añadir las que necesites)
+# Variables de entorno (debes configurar estas mismas en el panel de Cloudflare)
 [vars]
 NODE_ENV = "production"
+# Las siguientes variables deben ser configuradas en el panel de Cloudflare
+# DB_SERVER = ""
+# DB_DATABASE = ""
+# DB_USER = ""
+# DB_PASSWORD = ""
+# DB_ENCRYPT = ""
 
 # Configuración para desarrollo local
 [dev]
